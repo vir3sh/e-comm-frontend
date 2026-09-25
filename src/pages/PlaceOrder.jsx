@@ -146,7 +146,7 @@ const PlaceOrder = () => {
       }
     } catch (error) {
       console.log(error);
-      error.response?.data?.message;
+      toast.error(error.response?.data?.message);
     }
   };
 

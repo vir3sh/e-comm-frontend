@@ -18,7 +18,7 @@ const Login = () => {
     try {
       if (currentState === "Sign Up") {
         const response = await axios.post(
-          backendUrl + "/api/user/register",
+          backendUrl + "/api/user/",
           {
             name,
             email,
@@ -103,7 +103,7 @@ const Login = () => {
         required
       />
       <div className="w-full flex justify-between text-sm mt-[-8px]">
-        <p className=" cursor-pointer">Forgot your password?</p>
+        {/* <p className=" cursor-pointer">Forgot your password?</p> */}
         {currentState === "Login" ? (
           <p
             onClick={() => setCurrentState("Sign Up")}
