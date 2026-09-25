@@ -7,19 +7,34 @@ export const ShopContext = createContext();
 const ShopContextProvider = (props) => {
   const [product, setProduct] = useState([]);
   const [cartItems, setCartItems] = useState({});
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const delivery_fee = 100;
+
+  // ---------------------------------------
+  // GET PRODUCTS
+  // ---------------------------------------
+
   const getProducts = async () => {
     try {
-      // console.log("Request URL:", `${backendUrl}/api/products/list`);
-
       const response = await axios.get(`${backendUrl}/api/products/list`);
-      setProduct(response.data.products);
+
+      if (response.data.success) {
+        setProduct(response.data.products);
+      } else {
+        toast.error(response.data.message || "Failed to get products");
+      }
     } catch (error) {
-      console.log("API ERROR:", error);
+      console.log("PRODUCT API ERROR:", error);
+
+      toast.error(error.response?.data?.message || "Failed to get products");
     }
   };
+
+  // ---------------------------------------
+  // GET USER CART
+  // ---------------------------------------
 
   const getUserCart = async () => {
     try {
@@ -33,11 +48,19 @@ const ShopContextProvider = (props) => {
 
       if (response.data.success) {
         setCartItems(response.data.cartData);
+      } else {
+        toast.error(response.data.message || "Failed to get cart");
       }
     } catch (error) {
-      console.log(error);
+      console.log("GET CART ERROR:", error);
+
+      toast.error(error.response?.data?.message || "Failed to get cart");
     }
   };
+
+  // ---------------------------------------
+  // ADD TO CART
+  // ---------------------------------------
 
   const addToCart = async (itemId, size) => {
     if (!size) {
@@ -46,6 +69,7 @@ const ShopContextProvider = (props) => {
     }
 
     const cartData = structuredClone(cartItems);
+
     if (cartData[itemId]) {
       if (cartData[itemId][size]) {
         cartData[itemId][size] += 1;
@@ -56,20 +80,37 @@ const ShopContextProvider = (props) => {
       cartData[itemId] = {};
       cartData[itemId][size] = 1;
     }
+
+    // Update UI immediately
     setCartItems(cartData);
+
     toast.success("Product added");
 
     try {
-      await axios.post(
-        backendUrl + "/api/cart/add",
-        { itemId, size },
-        { withCredentials: true },
+      const response = await axios.post(
+        `${backendUrl}/api/cart/add`,
+        {
+          itemId,
+          size,
+        },
+        {
+          withCredentials: true,
+        },
       );
+
+      if (!response.data.success) {
+        toast.error(response.data.message || "Failed to add product");
+      }
     } catch (error) {
-      console.log(error);
-      toast.error(error.message);
+      console.log("ADD CART ERROR:", error);
+
+      toast.error(error.response?.data?.message || "Failed to add product");
     }
   };
+
+  // ---------------------------------------
+  // CHECK AUTH
+  // ---------------------------------------
 
   const checkAuth = async () => {
     try {
@@ -83,41 +124,72 @@ const ShopContextProvider = (props) => {
         setIsLoggedIn(false);
       }
     } catch (error) {
+      console.log("AUTH ERROR:", error);
+
       setIsLoggedIn(false);
     }
   };
 
+  // ---------------------------------------
+  // GET CART COUNT
+  // ---------------------------------------
+
   const getCartCount = () => {
     let totalCount = 0;
+
     for (const items in cartItems) {
       for (const item in cartItems[items]) {
         try {
           if (cartItems[items][item] > 0) {
             totalCount += cartItems[items][item];
           }
-        } catch (error) {}
+        } catch (error) {
+          console.log(error);
+        }
       }
     }
+
     return totalCount;
   };
 
+  // ---------------------------------------
+  // UPDATE CART QUANTITY
+  // ---------------------------------------
+
   const updateQuantity = async (itemId, size, quantity) => {
-    let cartData = structuredClone(cartItems);
+    const cartData = structuredClone(cartItems);
+
     cartData[itemId][size] = quantity;
 
+    // Update UI immediately
     setCartItems(cartData);
 
     try {
-      await axios.post(
-        backendUrl + "/api/cart/update",
-        { itemId, size, quantity },
-        { withCredentials: true },
+      const response = await axios.post(
+        `${backendUrl}/api/cart/update`,
+        {
+          itemId,
+          size,
+          quantity,
+        },
+        {
+          withCredentials: true,
+        },
       );
+
+      if (!response.data.success) {
+        toast.error(response.data.message || "Failed to update cart");
+      }
     } catch (error) {
-      console.log(error);
-      toast.error(error.message);
+      console.log("UPDATE CART ERROR:", error);
+
+      toast.error(error.response?.data?.message || "Failed to update cart");
     }
   };
+
+  // ---------------------------------------
+  // GET CART AMOUNT
+  // ---------------------------------------
 
   const getCartAmount = () => {
     let totalAmount = 0;
@@ -142,6 +214,10 @@ const ShopContextProvider = (props) => {
     return totalAmount;
   };
 
+  // ---------------------------------------
+  // REMOVE FROM CART
+  // ---------------------------------------
+
   const removeFromCart = async (itemId, size) => {
     const cartData = structuredClone(cartItems);
 
@@ -151,30 +227,49 @@ const ShopContextProvider = (props) => {
       delete cartData[itemId];
     }
 
+    // Update UI immediately
     setCartItems(cartData);
+
     toast.success("Product Removed");
 
     try {
-      await axios.post(
-        backendUrl + "/api/cart/remove",
-        { itemId, size },
-        { withCredentials: true },
+      const response = await axios.post(
+        `${backendUrl}/api/cart/remove`,
+        {
+          itemId,
+          size,
+        },
+        {
+          withCredentials: true,
+        },
       );
+
+      if (!response.data.success) {
+        toast.error(response.data.message || "Failed to remove product");
+      }
     } catch (error) {
-      console.log(error);
-      toast.error(error.message);
+      console.log("REMOVE CART ERROR:", error);
+
+      toast.error(error.response?.data?.message || "Failed to remove product");
     }
   };
 
+  // ---------------------------------------
+  // INITIAL DATA
+  // ---------------------------------------
+
   useEffect(() => {
     getUserCart();
-    // addToCart();
     getProducts();
     checkAuth();
-    getCartCount();
   }, []);
 
+  // ---------------------------------------
+  // CONTEXT VALUE
+  // ---------------------------------------
+
   const currency = "₹";
+
   const value = {
     product,
     currency,

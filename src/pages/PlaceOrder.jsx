@@ -127,7 +127,7 @@ const PlaceOrder = () => {
           toast.success("Order placed");
           navigate("/orders");
         } else {
-          toast.error(response.data.message);
+          toast.error(response?.data?.message);
         }
       }
 
