@@ -33,7 +33,7 @@ const Login = () => {
           setIsLoggedIn(true);
           navigate("/");
         } else {
-          toast.error(response.data.message);
+          toast.error("couldn't signup ");
         }
       } else {
         const response = await axios.post(
@@ -50,12 +50,12 @@ const Login = () => {
           setIsLoggedIn(true);
           navigate("/");
         } else {
-          toast.error(response.data.message);
+          toast.error("Couldn't Login");
         }
       }
     } catch (error) {
       console.log(error);
-      toast.error(error.message);
+      toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
 
