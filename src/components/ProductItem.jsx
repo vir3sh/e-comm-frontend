@@ -21,7 +21,7 @@ const ProductItem = ({ id, slug, name, price, image }) => {
         />
 
         {/* Wishlist */}
-        <button
+        {/* <button
           onClick={(e) => e.preventDefault()}
           className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-gray-500 shadow-sm backdrop-blur-sm transition-all duration-300 hover:bg-black hover:text-white"
         >
@@ -39,7 +39,7 @@ const ProductItem = ({ id, slug, name, price, image }) => {
               d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733C11.285 4.876 9.623 3.75 7.688 3.75 5.099 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
             />
           </svg>
-        </button>
+        </button> */}
 
         {/* Hover View Product */}
         <div className="absolute bottom-0 left-0 right-0 translate-y-full bg-black/90 px-4 py-3 text-center text-xs font-medium uppercase tracking-widest text-white transition-transform duration-300 group-hover:translate-y-0">
