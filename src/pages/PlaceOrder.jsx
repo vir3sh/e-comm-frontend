@@ -15,6 +15,7 @@ const PlaceOrder = () => {
     getCartAmount,
     delivery_fee,
     product,
+    isLoggedIn,
   } = useContext(ShopContext);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -77,6 +78,12 @@ const PlaceOrder = () => {
 
   const onSubmitHandler = async (event) => {
     event.preventDefault();
+
+    if (!isLoggedIn) {
+      toast.error("Please login first");
+      navigate("/login");
+      return;
+    }
 
     try {
       const orderItems = [];

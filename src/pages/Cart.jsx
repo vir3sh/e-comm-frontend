@@ -4,10 +4,17 @@ import Title from "../components/Title";
 import { useNavigate } from "react-router-dom";
 import CartTotal from "../components/CartTotal";
 import { MdDelete } from "react-icons/md";
+import { toast } from "react-toastify";
 
 const Cart = () => {
-  const { product, currency, cartItems, removeFromCart, updateQuantity } =
-    useContext(ShopContext);
+  const {
+    product,
+    currency,
+    cartItems,
+    removeFromCart,
+    updateQuantity,
+    isLoggedIn,
+  } = useContext(ShopContext);
 
   const [cartData, setCartData] = useState([]);
   const navigate = useNavigate();
@@ -101,7 +108,14 @@ const Cart = () => {
           <CartTotal />
           <div className=" w-full text-end">
             <button
-              onClick={() => navigate("/place-order")}
+              onClick={() => {
+                if (!isLoggedIn) {
+                  toast.error("Please login first");
+                  navigate("/login");
+                  return;
+                }
+                navigate("/place-order");
+              }}
               className="bg-black text-white text-sm my-8 px-8 py-3"
             >
               PROCEED TO CHECKOUT

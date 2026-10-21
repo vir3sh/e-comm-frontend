@@ -8,6 +8,7 @@ const ShopContextProvider = (props) => {
   const [product, setProduct] = useState([]);
   const [cartItems, setCartItems] = useState({});
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const delivery_fee = 100;
@@ -48,13 +49,13 @@ const ShopContextProvider = (props) => {
 
       if (response.data.success) {
         setCartItems(response.data.cartData);
-      } else {
-        toast.error(response.data.message || "Failed to get cart");
       }
     } catch (error) {
-      console.log("GET CART ERROR:", error);
-
-      toast.error(error.response?.data?.message || "Failed to get cart");
+      // Guests (401) simply have no cart - never show a toast on page load
+      if (error.response?.status !== 401) {
+        console.log("GET CART ERROR:", error);
+        toast.error(error.response?.data?.message || "Failed to get cart");
+      }
     }
   };
 
@@ -66,6 +67,17 @@ const ShopContextProvider = (props) => {
     if (!size) {
       toast.error("Please add size");
       return;
+    }
+
+    // Guests can browse freely - only block when they try to buy
+    let loggedIn = isLoggedIn;
+    if (!authChecked) {
+      loggedIn = await checkAuth();
+    }
+
+    if (!loggedIn) {
+      toast.error("Please login first");
+      return false;
     }
 
     const cartData = structuredClone(cartItems);
@@ -106,6 +118,8 @@ const ShopContextProvider = (props) => {
 
       toast.error(error.response?.data?.message || "Failed to add product");
     }
+
+    return true;
   };
 
   // ---------------------------------------
@@ -118,15 +132,15 @@ const ShopContextProvider = (props) => {
         withCredentials: true,
       });
 
-      if (response.data.success) {
-        setIsLoggedIn(true);
-      } else {
-        setIsLoggedIn(false);
-      }
+      const ok = Boolean(response.data.success);
+      setIsLoggedIn(ok);
+      return ok;
     } catch (error) {
-      console.log("AUTH ERROR:", error);
-
+      // 401 just means "not logged in" - not an error for the user
       setIsLoggedIn(false);
+      return false;
+    } finally {
+      setAuthChecked(true);
     }
   };
 
@@ -259,10 +273,21 @@ const ShopContextProvider = (props) => {
   // ---------------------------------------
 
   useEffect(() => {
-    getUserCart();
     getProducts();
     checkAuth();
   }, []);
+
+  // Load the cart only once we know the user is logged in
+  // (also runs right after login); clear it on logout
+  useEffect(() => {
+    if (!authChecked) return;
+
+    if (isLoggedIn) {
+      getUserCart();
+    } else {
+      setCartItems({});
+    }
+  }, [isLoggedIn, authChecked]);
 
   // ---------------------------------------
   // CONTEXT VALUE
@@ -280,6 +305,7 @@ const ShopContextProvider = (props) => {
     backendUrl,
     isLoggedIn,
     setIsLoggedIn,
+    authChecked,
     getCartCount,
     updateQuantity,
     removeFromCart,
