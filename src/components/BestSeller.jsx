@@ -13,12 +13,12 @@ const BestSeller = () => {
   }, [product]);
 
   return (
-    <div className="my-10">
+    <div className="my-10 max-w-7xl m-auto">
       <div className="text-center text-3xl py-8">
         <Title text1={"BEST"} text2={"SELLERS"} />
         <p className="w-3/4 m-auto text-xs sm:text-sm md:text-base text-gray-600">
-          Lorem Ipsum is simply dummy text of the printing and typesetting
-          industry. Lorem Ipsum has been the.
+          Discover the shirts everyone’s talking about. Shop our best-selling
+          styles, designed for effortless comfort and everyday confidence.
         </p>
       </div>
 

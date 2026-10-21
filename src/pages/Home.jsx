@@ -6,7 +6,7 @@ import HomeHero from "../components/HomeHero";
 
 const Home = () => {
   return (
-    <div className="max-w-7xl m-auto">
+    <div className="w-full">
       <HomeHero />
       <LatestCollection />
 
